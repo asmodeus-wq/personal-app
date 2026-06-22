@@ -134,11 +134,53 @@
             <!-- Insights Tab -->
             <div id="tab3" class="tab-panel hidden">
                 <div class="bg-white rounded-3xl shadow-sm p-8">
-                    <h2 class="text-2xl font-semibold mb-6">Gentle Insights • Last 7 Days</h2>
-                    <div class="bg-zinc-50 rounded-3xl p-4">
-                        <canvas id="burstChart" class="w-full h-72"></canvas>
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-semibold">Gentle Insights • Your Life in Balance</h2>
+                        <div class="text-xs text-zinc-400">Updated live from your bursts</div>
                     </div>
-                    <div class="text-xs text-center text-zinc-400 mt-4">Bursts across all your projects</div>
+
+                    <!-- Overall Stats Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8" id="insights-stats">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Weekly Activity -->
+                        <div class="bg-zinc-50 rounded-3xl p-6">
+                            <h3 class="font-semibold mb-4 flex items-center gap-2">
+                                <span>Weekly Activity</span>
+                                <span class="text-xs text-emerald-600">(Last 7 days)</span>
+                            </h3>
+                            <canvas id="weeklyChart" class="w-full h-64"></canvas>
+                        </div>
+
+                        <!-- Time by Interest -->
+                        <div class="bg-zinc-50 rounded-3xl p-6">
+                            <h3 class="font-semibold mb-4">Time by Interest</h3>
+                            <canvas id="interestChart" class="w-full h-64"></canvas>
+                        </div>
+
+                        <!-- Time by Skill -->
+                        <div class="bg-zinc-50 rounded-3xl p-6">
+                            <h3 class="font-semibold mb-4">Time by Skill</h3>
+                            <canvas id="skillChart" class="w-full h-64"></canvas>
+                        </div>
+
+                        <!-- Project Overview -->
+                        <div class="bg-zinc-50 rounded-3xl p-6">
+                            <h3 class="font-semibold mb-4">Project Progress</h3>
+                            <div id="project-overview" class="space-y-3 text-sm">
+                                <!-- Populated by JS: active/completed counts + top projects -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-6 text-center text-xs text-zinc-400">
+                        These visuals celebrate your unique polymath rhythm — no judgment, just gentle patterns 🌱
+                    </div>
                 </div>
             </div>
 
@@ -173,11 +215,11 @@
 
     <script>
         // ============================================
-        // SparkTrack v0.2 — Polymath Projects Edition
+        // SparkTrack v0.3 — Polymath Edition (Skills + Rich Insights)
         // Data model:
-        // interests: [{ id, name, projects: [{ id, name, status:'active'|'completed', startDate, endDate, bursts: [{id, startTime, duration, notes}] }] }]
-        // bursts now live inside projects (no top-level bursts array)
-        // reflections stay at interest level for simplicity
+        // interests: [{ id, name, skills: string[], projects: [...] }]
+        // skills per interest (1-3 recommended) for cross-cutting themes
+        // bursts inside projects
         // ============================================
 
         let data = {
@@ -188,7 +230,7 @@
 
         let currentBurstInterval = null;
         let currentBurstStart = null;
-        let chartInstance = null;
+        let chartInstances = []; // Track all charts for cleanup
 
         function loadData() {
             const saved = localStorage.getItem('sparktrack_data');
@@ -205,6 +247,7 @@
                 data.interests = oldInterestNames.map((name, idx) => ({
                     id: Date.now() + idx,
                     name: name,
+                    skills: [],
                     projects: []
                 }));
 
@@ -230,9 +273,10 @@
                 }
             }
 
-            // Ensure every interest has projects array
+            // Ensure every interest has projects array and skills array
             data.interests.forEach(int => {
                 if (!int.projects) int.projects = [];
+                if (!int.skills) int.skills = [];
                 int.projects.forEach(p => {
                     if (!p.bursts) p.bursts = [];
                     if (!p.status) p.status = 'active';
@@ -505,6 +549,7 @@
             data.interests.push({
                 id: Date.now(),
                 name: name,
+                skills: [],
                 projects: []
             });
             saveData();
@@ -512,6 +557,41 @@
             populateBurstSelects();
             showToast(`Added "${name}" to your garden 🌱`);
             input.value = '';
+        }
+
+        function addSkillToInterest(interestId) {
+            const input = document.getElementById(`new-skill-input-${interestId}`);
+            if (!input) return;
+            const skill = input.value.trim();
+            if (!skill) return;
+
+            const interest = data.interests.find(i => i.id == interestId);
+            if (!interest) return;
+
+            if (interest.skills.includes(skill)) {
+                showToast("Skill already added.");
+                return;
+            }
+            if (interest.skills.length >= 3) {
+                showToast("Max 3 skills per interest recommended.");
+                return;
+            }
+
+            interest.skills.push(skill);
+            saveData();
+            renderInterests();
+            showToast(`Added skill "${skill}" to ${interest.name}`);
+            input.value = '';
+        }
+
+        function removeSkillFromInterest(interestId, skill) {
+            const interest = data.interests.find(i => i.id == interestId);
+            if (!interest) return;
+
+            interest.skills = interest.skills.filter(s => s !== skill);
+            saveData();
+            renderInterests();
+            showToast(`Removed skill "${skill}"`);
         }
 
         function addProject(interestId) {
@@ -560,7 +640,9 @@
             const hours = Math.floor(stats.totalMin / 60);
             const mins = stats.totalMin % 60;
 
-            showToast(`🎉 "${project.name}" completed!\n${stats.days} days • ${stats.burstCount} bursts • ${hours}h ${mins}m\nBeautiful work on your polymath journey!`);
+            showToast(`🎉 "${project.name}" completed!
+${stats.days} days • ${stats.burstCount} bursts • ${hours}h ${mins}m
+Beautiful work on your polymath journey!`);
 
             renderInterests();
             populateBurstSelects();
@@ -615,6 +697,22 @@
                             <div>
                                 <div class="font-semibold text-xl">${interest.name}</div>
                                 <div class="text-xs text-zinc-500">${activeProjects.length} active project${activeProjects.length !== 1 ? 's' : ''}</div>
+                                <!-- Skills tags -->
+                                <div class="flex flex-wrap gap-1 mt-1.5" id="skills-${interest.id}">
+                                    ${interest.skills.length > 0 ? interest.skills.map(skill => `
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-violet-100 text-violet-700 font-medium">
+                                            ${skill}
+                                            <button onclick="removeSkillFromInterest(${interest.id}, '${skill}'); event.stopImmediatePropagation();" class="ml-1 text-violet-500 hover:text-red-500">×</button>
+                                        </span>
+                                    `).join('') : '<span class="text-xs text-zinc-400">No skills yet</span>'}
+                                </div>
+                                <!-- Add skill -->
+                                <div class="flex gap-1 mt-2">
+                                    <input id="new-skill-input-${interest.id}" type="text" placeholder="Add skill (e.g. Critical Thinking)" 
+                                           class="flex-1 text-xs px-3 py-1.5 border border-zinc-200 rounded-xl focus:outline-none focus:border-violet-300">
+                                    <button onclick="addSkillToInterest(${interest.id}); event.stopImmediatePropagation();" 
+                                            class="px-3 py-1.5 text-xs bg-violet-600 text-white rounded-xl hover:bg-violet-700">Add</button>
+                                </div>
                             </div>
                         </div>
                         <button onclick="removeInterest(${interest.id})" 
@@ -766,61 +864,215 @@
         }
 
         function renderInsights() {
-            const ctx = document.getElementById('burstChart');
-            if (chartInstance) chartInstance.destroy();
+            // Cleanup previous charts
+            chartInstances.forEach(chart => chart.destroy());
+            chartInstances = [];
 
-            // Collect ALL bursts from nested projects
+            // === Collect data ===
             const allBursts = [];
-            data.interests.forEach(i => {
-                i.projects.forEach(p => {
-                    p.bursts.forEach(b => allBursts.push(b));
+            let totalMinutes = 0;
+            let totalBursts = 0;
+            let activeProjectCount = 0;
+            let completedProjectCount = 0;
+
+            const interestMinutes = {};
+            const skillMinutes = {};
+
+            data.interests.forEach(interest => {
+                let intTotal = 0;
+                interest.projects.forEach(proj => {
+                    if (proj.status === 'active') activeProjectCount++;
+                    if (proj.status === 'completed') completedProjectCount++;
+
+                    proj.bursts.forEach(b => {
+                        const dur = b.duration || 0;
+                        allBursts.push(b);
+                        totalMinutes += dur;
+                        totalBursts++;
+                        intTotal += dur;
+                    });
                 });
+                interestMinutes[interest.name] = intTotal;
+
+                // Distribute interest time across its skills (or assign fully if no skills)
+                if (interest.skills.length > 0) {
+                    const perSkill = intTotal / interest.skills.length;
+                    interest.skills.forEach(skill => {
+                        skillMinutes[skill] = (skillMinutes[skill] || 0) + perSkill;
+                    });
+                } else if (intTotal > 0) {
+                    // Fallback: attribute to interest name as "general skill"
+                    const key = interest.name + " (General)";
+                    skillMinutes[key] = (skillMinutes[key] || 0) + intTotal;
+                }
             });
 
-            const last7Days = {};
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const key = d.toISOString().split('T')[0];
-                last7Days[key] = 0;
+            // === Stats Cards ===
+            const statsContainer = document.getElementById('insights-stats');
+            if (statsContainer) {
+                statsContainer.innerHTML = `
+                    <div class="bg-zinc-50 rounded-3xl p-5 text-center">
+                        <div class="text-3xl font-semibold text-violet-600">${Math.floor(totalMinutes / 60)}<span class="text-xl">h</span> ${totalMinutes % 60}<span class="text-xl">m</span></div>
+                        <div class="text-xs text-zinc-500 mt-1 font-medium">TOTAL TIME LOGGED</div>
+                    </div>
+                    <div class="bg-zinc-50 rounded-3xl p-5 text-center">
+                        <div class="text-3xl font-semibold text-emerald-600">${totalBursts}</div>
+                        <div class="text-xs text-zinc-500 mt-1 font-medium">BURSTS COMPLETED</div>
+                    </div>
+                    <div class="bg-zinc-50 rounded-3xl p-5 text-center">
+                        <div class="text-3xl font-semibold text-amber-600">${activeProjectCount}</div>
+                        <div class="text-xs text-zinc-500 mt-1 font-medium">ACTIVE PROJECTS</div>
+                    </div>
+                    <div class="bg-zinc-50 rounded-3xl p-5 text-center">
+                        <div class="text-3xl font-semibold text-teal-600">${completedProjectCount}</div>
+                        <div class="text-xs text-zinc-500 mt-1 font-medium">COMPLETED PROJECTS</div>
+                    </div>
+                `;
             }
 
-            allBursts.forEach(b => {
-                const dateKey = new Date(b.startTime).toISOString().split('T')[0];
-                if (last7Days.hasOwnProperty(dateKey)) {
-                    last7Days[dateKey] += (b.duration || 0);
+            // === Weekly Activity Chart (Bar) ===
+            const weeklyCtx = document.getElementById('weeklyChart');
+            if (weeklyCtx) {
+                const last7Days = {};
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const key = d.toISOString().split('T')[0];
+                    last7Days[key] = 0;
                 }
-            });
-
-            const labels = Object.keys(last7Days).map(d => new Date(d).toLocaleDateString([], {weekday: 'short'}));
-            const values = Object.values(last7Days);
-
-            chartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Minutes',
-                        data: values,
-                        backgroundColor: '#a78bfa',
-                        borderColor: '#7c3aed',
-                        borderWidth: 2,
-                        borderRadius: 8,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f3e8ff' }, ticks: { stepSize: 30 } },
-                        x: { grid: { color: '#f3e8ff' } }
+                allBursts.forEach(b => {
+                    const dateKey = new Date(b.startTime).toISOString().split('T')[0];
+                    if (last7Days.hasOwnProperty(dateKey)) {
+                        last7Days[dateKey] += (b.duration || 0);
                     }
+                });
+                const labels = Object.keys(last7Days).map(d => new Date(d).toLocaleDateString([], {weekday: 'short'}));
+                const values = Object.values(last7Days);
+
+                const weeklyChart = new Chart(weeklyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Minutes',
+                            data: values,
+                            backgroundColor: '#a78bfa',
+                            borderColor: '#7c3aed',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#f3e8ff' } },
+                            x: { grid: { color: '#f3e8ff' } }
+                        }
+                    }
+                });
+                chartInstances.push(weeklyChart);
+            }
+
+            // === Time by Interest (Doughnut/Pie) ===
+            const interestCtx = document.getElementById('interestChart');
+            if (interestCtx) {
+                const intLabels = Object.keys(interestMinutes).filter(k => interestMinutes[k] > 0);
+                const intValues = intLabels.map(k => interestMinutes[k]);
+
+                const interestChart = new Chart(interestCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: intLabels.length > 0 ? intLabels : ['No data yet'],
+                        datasets: [{
+                            data: intValues.length > 0 ? intValues : [1],
+                            backgroundColor: ['#a78bfa', '#7c3aed', '#c084fc', '#e0aaff', '#ddd6fe'],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+                        }
+                    }
+                });
+                chartInstances.push(interestChart);
+            }
+
+            // === Time by Skill (Doughnut) ===
+            const skillCtx = document.getElementById('skillChart');
+            if (skillCtx) {
+                const skLabels = Object.keys(skillMinutes).filter(k => skillMinutes[k] > 0);
+                const skValues = skLabels.map(k => Math.round(skillMinutes[k]));
+
+                const skillChart = new Chart(skillCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: skLabels.length > 0 ? skLabels : ['Add skills to interests'],
+                        datasets: [{
+                            data: skValues.length > 0 ? skValues : [1],
+                            backgroundColor: ['#34d399', '#10b981', '#6ee7b7', '#a7f3d0', '#d1fae5'],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+                        }
+                    }
+                });
+                chartInstances.push(skillChart);
+            }
+
+            // === Project Progress Overview ===
+            const projContainer = document.getElementById('project-overview');
+            if (projContainer) {
+                let html = `
+                    <div class="flex justify-between text-xs mb-2 px-1">
+                        <div><span class="font-medium">${activeProjectCount}</span> Active</div>
+                        <div><span class="font-medium">${completedProjectCount}</span> Completed</div>
+                    </div>
+                `;
+
+                // Show a few recent completed or top active by time
+                const allProjects = [];
+                data.interests.forEach(int => {
+                    int.projects.forEach(p => {
+                        const stats = calculateProjectStats(p);
+                        allProjects.push({ ...p, interestName: int.name, stats });
+                    });
+                });
+
+                const recentCompleted = allProjects
+                    .filter(p => p.status === 'completed')
+                    .sort((a,b) => (b.endDate || 0) - (a.endDate || 0))
+                    .slice(0, 2);
+
+                if (recentCompleted.length > 0) {
+                    html += `<div class="text-xs font-medium mb-2 px-1 text-emerald-600">Recently Completed</div>`;
+                    recentCompleted.forEach(p => {
+                        const h = Math.floor(p.stats.totalMin / 60);
+                        const m = p.stats.totalMin % 60;
+                        html += `
+                            <div class="bg-white p-3 rounded-2xl border border-emerald-100 text-xs">
+                                <div class="font-medium">${p.name} <span class="text-emerald-500">(${p.interestName})</span></div>
+                                <div class="text-emerald-600 mt-0.5">${p.stats.days} days • ${p.stats.burstCount} bursts • ${h}h ${m}m</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += `<div class="text-xs text-zinc-400 italic px-1">Complete a project to see its beautiful stats here.</div>`;
                 }
-            });
+
+                projContainer.innerHTML = html;
+            }
         }
 
         function exportData() {
