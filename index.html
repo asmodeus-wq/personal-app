@@ -20,7 +20,7 @@
 <body class="bg-zinc-50 min-h-screen">
     <div class="max-w-4xl mx-auto p-4">
         <!-- Header -->
-        <header class="flex justify-between items-center py-6">
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 py-6">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-violet-600 rounded-2xl flex items-center justify-center text-white text-2xl">✨</div>
                 <div>
@@ -28,12 +28,12 @@
                     <p class="text-zinc-500 text-sm">gentle bursts • polymath projects</p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <button onclick="switchTab(0)" id="tab-0" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium active">Today</button>
-                <button onclick="switchTab(1)" id="tab-1" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium">Interests</button>
-                <button onclick="switchTab(2)" id="tab-2" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium">Reflections</button>
-                <button onclick="switchTab(3)" id="tab-3" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium">Insights</button>
-                <button onclick="switchTab(4)" id="tab-4" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium">Data</button>
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                <button onclick="switchTab(0)" id="tab-0" class="tab-btn px-5 py-2.5 rounded-2xl text-sm font-medium whitespace-nowrap active">Today</button>
+                <button onclick="switchTab(1)" id="tab-1" class="tab-btn px-5 py-2.5 rounded-2xl text-sm font-medium whitespace-nowrap">Interests</button>
+                <button onclick="switchTab(2)" id="tab-2" class="tab-btn px-5 py-2.5 rounded-2xl text-sm font-medium whitespace-nowrap">Reflections</button>
+                <button onclick="switchTab(3)" id="tab-3" class="tab-btn px-5 py-2.5 rounded-2xl text-sm font-medium whitespace-nowrap">Insights</button>
+                <button onclick="switchTab(4)" id="tab-4" class="tab-btn px-5 py-2.5 rounded-2xl text-sm font-medium whitespace-nowrap">Data</button>
             </div>
         </header>
 
@@ -46,39 +46,39 @@
             <div id="tab0" class="tab-panel">
                 <div class="bg-white rounded-3xl shadow-sm p-8 mb-6">
                     <!-- Project Selector for Bursts -->
-                    <div class="mb-6">
+                    <div class="mb-6 p-5 bg-zinc-50 rounded-2xl">
                         <div class="text-sm font-medium text-zinc-600 mb-2">Track this burst under:</div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <select id="burst-interest-select" onchange="updateProjectSelect()" 
-                                    class="w-full px-4 py-3.5 border border-zinc-200 rounded-2xl text-sm focus:outline-none focus:border-violet-300">
+                                    class="w-full px-5 py-3.5 border border-zinc-200 rounded-2xl text-sm focus:outline-none focus:border-violet-300 bg-white">
                             </select>
                             <select id="burst-project-select" 
-                                    class="w-full px-4 py-3.5 border border-zinc-200 rounded-2xl text-sm focus:outline-none focus:border-violet-300">
+                                    class="w-full px-5 py-3.5 border border-zinc-200 rounded-2xl text-sm focus:outline-none focus:border-violet-300 bg-white">
                             </select>
                         </div>
-                        <div class="text-[10px] text-zinc-400 mt-1.5">Select interest &amp; project before starting a burst</div>
+                        <div class="text-[10px] text-zinc-400 mt-2">Select interest &amp; project before starting a burst</div>
                     </div>
 
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
+                    <div class="flex flex-col sm:flex-row sm:items-end gap-6 mb-8">
+                        <div class="flex-1">
                             <h2 class="text-2xl font-semibold text-zinc-800">Current Burst</h2>
-                            <p id="current-burst-time" class="text-5xl font-mono text-violet-600 font-semibold mt-2">00:00</p>
+                            <p id="current-burst-time" class="text-6xl font-mono text-violet-600 font-semibold mt-1 tracking-tighter">00:00</p>
                         </div>
                         <button onclick="toggleBurst()" id="burst-btn"
-                            class="px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl text-lg font-medium transition-all flex items-center gap-2 shadow-sm">
-                            <span id="burst-icon">▶️</span>
+                            class="px-10 py-5 bg-violet-600 hover:bg-violet-700 text-white rounded-3xl text-lg font-medium transition-all flex items-center gap-3 shadow-sm flex-shrink-0">
+                            <span id="burst-icon" class="text-xl">▶️</span>
                             <span id="burst-text">Start Burst</span>
                         </button>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <div onclick="quickLog(15)" class="bg-zinc-100 hover:bg-violet-100 active:bg-violet-200 p-6 rounded-2xl cursor-pointer transition-colors text-center">
-                            <div class="text-3xl mb-2">15m</div>
-                            <div class="text-sm text-zinc-500">Quick Focus</div>
+                        <div onclick="quickLog(15)" class="bg-zinc-100 hover:bg-violet-100 active:bg-violet-200 p-7 rounded-3xl cursor-pointer transition-all text-center border border-transparent hover:border-violet-200">
+                            <div class="text-4xl mb-3">15m</div>
+                            <div class="text-sm text-zinc-500 font-medium">Quick Focus</div>
                         </div>
-                        <div onclick="quickLog(30)" class="bg-zinc-100 hover:bg-violet-100 active:bg-violet-200 p-6 rounded-2xl cursor-pointer transition-colors text-center">
-                            <div class="text-3xl mb-2">30m</div>
-                            <div class="text-sm text-zinc-500">Deep Work</div>
+                        <div onclick="quickLog(30)" class="bg-zinc-100 hover:bg-violet-100 active:bg-violet-200 p-7 rounded-3xl cursor-pointer transition-all text-center border border-transparent hover:border-violet-200">
+                            <div class="text-4xl mb-3">30m</div>
+                            <div class="text-sm text-zinc-500 font-medium">Deep Work</div>
                         </div>
                     </div>
                 </div>
@@ -100,11 +100,11 @@
                         <h2 class="text-2xl font-semibold">Your Garden of Interests &amp; Projects</h2>
                     </div>
                     
-                    <div class="flex gap-2 mb-6">
+                    <div class="flex gap-2 mb-8">
                         <input id="new-interest" type="text" placeholder="New field / interest (e.g. Philosophy, Art, Writing)" 
                                class="flex-1 px-5 py-4 border border-zinc-200 rounded-2xl focus:outline-none focus:border-violet-300">
                         <button onclick="addInterest()" 
-                                class="px-8 py-4 bg-violet-600 text-white rounded-2xl hover:bg-violet-700 font-medium">Add Interest</button>
+                                class="px-8 py-4 bg-violet-600 text-white rounded-2xl hover:bg-violet-700 font-medium whitespace-nowrap">Add Interest</button>
                     </div>
                     
                     <div id="interests-list" class="space-y-6"></div>
@@ -125,7 +125,7 @@
                     <div class="text-xs text-zinc-400 mt-2">Reflections are saved at the interest level for now. Projects live inside interests.</div>
                 </div>
                 
-                <div class="mt-6 bg-white rounded-3xl shadow-sm p-6">
+                <div class="mt-6 bg-white rounded-3xl shadow-sm p-8">
                     <h3 class="font-medium mb-4">Recent Reflections</h3>
                     <div id="recent-reflections" class="space-y-4"></div>
                 </div>
@@ -135,32 +135,34 @@
             <div id="tab3" class="tab-panel hidden">
                 <div class="bg-white rounded-3xl shadow-sm p-8">
                     <h2 class="text-2xl font-semibold mb-6">Gentle Insights • Last 7 Days</h2>
-                    <canvas id="burstChart" class="w-full h-72"></canvas>
-                    <div class="text-xs text-center text-zinc-400 mt-3">Bursts across all your projects</div>
+                    <div class="bg-zinc-50 rounded-3xl p-4">
+                        <canvas id="burstChart" class="w-full h-72"></canvas>
+                    </div>
+                    <div class="text-xs text-center text-zinc-400 mt-4">Bursts across all your projects</div>
                 </div>
             </div>
 
             <!-- Data Tab -->
             <div id="tab4" class="tab-panel hidden">
-                <div class="bg-white rounded-3xl shadow-sm p-8 space-y-6">
+                <div class="bg-white rounded-3xl shadow-sm p-8 space-y-8">
                     <div>
-                        <h2 class="text-2xl font-semibold mb-4">Data Management</h2>
-                        <div class="grid grid-cols-2 gap-4">
+                        <h2 class="text-2xl font-semibold mb-5">Data Management</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <button onclick="exportData()" 
-                                    class="py-6 px-8 border border-zinc-200 hover:border-violet-300 rounded-3xl text-left transition-colors">
-                                <div class="font-medium">Export Full Backup</div>
-                                <div class="text-sm text-zinc-500">Download JSON (interests + projects + bursts + reflections)</div>
+                                    class="py-8 px-8 border border-zinc-200 hover:border-violet-300 rounded-3xl text-left transition-all hover:shadow-sm">
+                                <div class="font-medium text-lg">Export Full Backup</div>
+                                <div class="text-sm text-zinc-500 mt-1 leading-snug">Download JSON (interests + projects + bursts + reflections)</div>
                             </button>
-                            <label class="py-6 px-8 border border-zinc-200 hover:border-violet-300 rounded-3xl text-left cursor-pointer transition-colors">
-                                <div class="font-medium">Import &amp; Merge</div>
-                                <div class="text-sm text-zinc-500">Add data from previous backup</div>
+                            <label class="py-8 px-8 border border-zinc-200 hover:border-violet-300 rounded-3xl text-left cursor-pointer transition-all hover:shadow-sm">
+                                <div class="font-medium text-lg">Import &amp; Merge</div>
+                                <div class="text-sm text-zinc-500 mt-1 leading-snug">Add data from previous backup</div>
                                 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
                             </label>
                         </div>
                     </div>
                     
                     <button onclick="clearData()" 
-                            class="w-full py-4 text-red-600 hover:bg-red-50 rounded-2xl border border-red-200 font-medium">Clear All Data (permanent — with confirmation)</button>
+                            class="w-full py-5 text-red-600 hover:bg-red-50 rounded-3xl border border-red-200 font-medium text-base">Clear All Data (permanent — with confirmation)</button>
                 </div>
             </div>
         </div>
@@ -629,24 +631,24 @@
                 `;
 
                 // Active Projects
-                html += `<div class="mb-2"><div class="text-xs uppercase tracking-widest text-zinc-500 font-medium mb-2 px-1">ACTIVE PROJECTS</div>`;
+                html += `<div class="mb-3"><div class="text-xs uppercase tracking-widest text-zinc-500 font-medium mb-3 px-1">ACTIVE PROJECTS</div>`;
                 if (activeProjects.length === 0) {
-                    html += `<div class="text-sm text-zinc-400 italic px-1 py-2">No active projects yet. Add one above to begin tracking bursts.</div>`;
+                    html += `<div class="text-sm text-zinc-400 italic px-1 py-4 bg-zinc-50 rounded-2xl text-center">No active projects yet. Add one above to begin tracking bursts.</div>`;
                 } else {
                     activeProjects.forEach(proj => {
                         const stats = calculateProjectStats(proj);
                         const daysSoFar = stats.days;
                         html += `
-                            <div class="flex items-center justify-between bg-zinc-50 hover:bg-zinc-100 transition-colors p-4 rounded-2xl mb-2 last:mb-0">
-                                <div class="min-w-0 flex-1 pr-3">
-                                    <div class="font-medium truncate">${proj.name}</div>
-                                    <div class="text-xs text-zinc-500 mt-0.5">${daysSoFar} day${daysSoFar !== 1 ? 's' : ''} • ${proj.bursts.length} bursts • ${stats.totalMin} min so far</div>
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-4 bg-zinc-50 hover:bg-zinc-100 transition-all p-5 rounded-3xl mb-3 last:mb-0 group">
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-medium truncate text-base">${proj.name}</div>
+                                    <div class="text-xs text-zinc-500 mt-1">${daysSoFar} day${daysSoFar !== 1 ? 's' : ''} • ${proj.bursts.length} bursts • ${stats.totalMin} min</div>
                                 </div>
-                                <div class="flex gap-2 flex-shrink-0">
+                                <div class="flex gap-2 flex-shrink-0 pt-1 sm:pt-0">
                                     <button onclick="startBurstForProject(${interest.id}, ${proj.id})" 
-                                            class="px-4 py-2 text-sm bg-violet-600 text-white rounded-xl hover:bg-violet-700 font-medium">Start Burst</button>
+                                            class="px-5 py-2.5 text-sm bg-violet-600 text-white rounded-2xl hover:bg-violet-700 font-medium transition-all">Start Burst</button>
                                     <button onclick="completeProject(${interest.id}, ${proj.id})" 
-                                            class="px-4 py-2 text-sm bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 font-medium">Mark Complete</button>
+                                            class="px-5 py-2.5 text-sm bg-emerald-100 text-emerald-700 rounded-2xl hover:bg-emerald-200 font-medium transition-all">Complete</button>
                                 </div>
                             </div>
                         `;
@@ -669,14 +671,16 @@
                         const h = Math.floor(stats.totalMin / 60);
                         const m = stats.totalMin % 60;
                         html += `
-                            <div class="bg-emerald-50 p-4 rounded-2xl text-sm">
+                            <div class="bg-emerald-50/70 p-5 rounded-3xl text-sm border border-emerald-100">
                                 <div class="flex justify-between items-start">
-                                    <div class="font-medium">${proj.name}</div>
-                                    <div class="text-emerald-600 text-xs whitespace-nowrap">Completed ${new Date(proj.endDate).toLocaleDateString()}</div>
+                                    <div class="font-medium pr-4">${proj.name}</div>
+                                    <div class="text-emerald-600 text-xs whitespace-nowrap pt-0.5">Completed ${new Date(proj.endDate).toLocaleDateString()}</div>
                                 </div>
-                                <div class="text-emerald-700/80 mt-1 text-xs">
-                                    ${stats.days} days • ${stats.burstCount} bursts • ${h}h ${m}m total
-                                    ${stats.avgPerDay > 0 ? ` • ~${stats.avgPerDay} min/day` : ''}
+                                <div class="text-emerald-700/80 mt-2 text-xs flex items-center gap-4">
+                                    <span>${stats.days} days</span>
+                                    <span>${stats.burstCount} bursts</span>
+                                    <span>${h}h ${m}m</span>
+                                    ${stats.avgPerDay > 0 ? `<span class="text-emerald-600">~${stats.avgPerDay} min/day</span>` : ''}
                                 </div>
                             </div>
                         `;
